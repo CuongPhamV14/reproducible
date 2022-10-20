@@ -11,8 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
 
-
-
 **1. Loading and preprocessing the data**
 
 Check the data file if exist in the working folder, otherwise download from provided link and load into *data* frame. 
@@ -31,7 +29,6 @@ data <- read.csv("activity.csv")
 ```
 
 **2. What is mean total number of steps taken per day?**
-
 
 ```{r}
 
@@ -128,6 +125,3 @@ xyplot(StepsTotal$steps ~ StepsTotal$interval|StepsTotal$dow,
        main="Average Steps per Day by Interval", xlab="Interval", ylab="Steps",layout=c(1,2), type="l")
 
 ```
-
-
-
