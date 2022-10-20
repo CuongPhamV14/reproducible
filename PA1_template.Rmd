@@ -1,0 +1,133 @@
+---
+title: 'Peer-graded Assignment: Course Project 1'
+author: "Cuong Pham V"
+date: "10/20/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+This assignment makes use of data from a personal activity monitoring device. This device collects data at 5 minute intervals through out the day. The data consists of two months of data from an anonymous individual collected during the months of October and November, 2012 and include the number of steps taken in 5 minute intervals each day.
+
+
+
+**1. Loading and preprocessing the data**
+
+Check the data file if exist in the working folder, otherwise download from provided link and load into *data* frame. 
+
+```{r }
+
+if (!file.exists("activity.csv") )
+{
+  dlurl <- 'http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip'  
+  download.file(dlurl,destfile='repdata%2Fdata%2Factivity.zip',mode='wb')  
+  unzip('repdata%2Fdata%2Factivity.zip')
+}
+
+data <- read.csv("activity.csv") 
+
+```
+
+**2. What is mean total number of steps taken per day?**
+
+
+```{r}
+
+# calculate the total number of steps taken per day
+
+steps_by_day <- aggregate(steps ~ date, data, sum)
+
+# Make a histogram
+
+hist(steps_by_day$steps, main = paste("Total steps per day"), col=rgb(1,0,0,0.5),
+     xlab="Number of Steps")
+
+# calculate and report the mean
+
+rmean <- mean(steps_by_day$steps)
+rmean
+
+#calculate and report the median
+
+rmedian <- median(steps_by_day$steps)
+rmedian
+
+```
+
+**3. What is the average daily activity pattern?**
+
+```{r}
+
+# calculate interval and make a time series plot. 
+
+steps_by_interval <- aggregate(steps ~ interval, data, mean)
+plot(steps_by_interval$interval,steps_by_interval$steps, type="l", 
+     xlab="5-minute Interval", ylab="Number of Steps",
+     main="Average # of steps per day by Interval")
+
+# identify max interval 
+max_interval <- steps_by_interval[which.max(steps_by_interval$steps),1]
+max_interval
+```
+
+** Imputing missing values**
+
+```{r}
+# Calculate and report the total number of missing values in the dataset
+
+NATotal <- sum(!complete.cases(data))
+NATotal
+
+StepsAvg <- aggregate(steps ~ interval, data = data, FUN = mean)
+imptNA <- numeric()
+for (i in 1:nrow(data)) {
+  obs <- data[i, ]
+  if (is.na(obs$steps)) {
+    steps <- subset(StepsAvg, interval == obs$interval)$steps
+  } else {
+    steps <- obs$steps
+  }
+  imptNA <- c(imptNA, steps)
+}
+
+newdata <- data
+newdata$steps <- imptNA
+
+# Make histogram, calculate mean, median and compare with original data
+
+StepsTotal <- aggregate(steps ~ date, data = newdata, sum, na.rm = TRUE)
+hist(StepsTotal$steps, main = paste("Total Steps Each Day"), col="blue", xlab="Number of Steps")
+
+#Create Histogram to show difference. 
+hist(steps_by_day$steps, main = paste("Total Steps Each Day"), col=rgb(1,0,0,0.5), xlab="Number of Steps", add=T)
+legend("topright", c("Imputed", "Non-imputed"), col=c("blue", rgb(1,0,0,0.5)), lwd=10)
+
+rmeantotal <- mean(StepsTotal$steps)
+rmeantotal
+
+rmediantotal <- median(StepsTotal$steps)
+rmediantotal
+
+rmediandiff <- rmediantotal - rmedian
+rmediandiff
+
+```
+
+** Are there differences in activity patterns between weekdays and weekends?**
+
+```{r}
+
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", 
+              "Friday")
+newdata$dow = as.factor(ifelse(is.element(weekdays(as.Date(newdata$date)),weekdays), "Weekday", "Weekend"))
+StepsTotal <- aggregate(steps ~ interval + dow, newdata, mean)
+library(lattice)
+xyplot(StepsTotal$steps ~ StepsTotal$interval|StepsTotal$dow, 
+       main="Average Steps per Day by Interval", xlab="Interval", ylab="Steps",layout=c(1,2), type="l")
+
+```
+
+
+
