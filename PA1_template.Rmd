@@ -116,8 +116,7 @@ rmediandiff
 
 ```{r}
 
-weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", 
-              "Friday")
+weekdays <- c("Monday", "Tuesday", "Wednesday", "Thursday", "Friday")
 newdata$dow = as.factor(ifelse(is.element(weekdays(as.Date(newdata$date)),weekdays), "Weekday", "Weekend"))
 StepsTotal <- aggregate(steps ~ interval + dow, newdata, mean)
 library(lattice)
